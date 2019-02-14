@@ -1,5 +1,5 @@
-export interface State<DATA=any>{
-    name : string;
+export interface IState<DATA= any> {
+    name: string;
 
     startTime ?: number;
     currentTime ?: number;
@@ -7,19 +7,19 @@ export interface State<DATA=any>{
     counter ?: number;
     started ?: boolean;
 
-    start  ?: ( state : this, data : DATA )=>void;
-    update :  ( state : this, data : DATA )=>string | void;
-    stop   ?: ( state : this, data : DATA )=>void;
+    start  ?: ( state: this, data: DATA ) => void;
+    update: ( state: this, data: DATA ) => string | void;
+    stop   ?: ( state: this, data: DATA ) => void;
 }
 
-export class StateMachine<STATE extends State = State, DATA = any> {
-    states  : STATE[];
-    current : STATE;
+export class StateMachine<STATE extends IState = IState, DATA = any> {
+    public states: STATE[];
+    public current: STATE;
 
-    constructor(private data : DATA){}
+    constructor(private data: DATA) {}
 
-    start(startState: string, forceRestart:boolean = false){
-        if( !forceRestart && this.current && this.current.name == startState ){
+    public start(startState: string, forceRestart: boolean = false) {
+        if ( !forceRestart && this.current && this.current.name == startState ) {
             return;
         }
 
@@ -28,42 +28,44 @@ export class StateMachine<STATE extends State = State, DATA = any> {
         this.current.startTime = this.getNowTime();
         this.current.started = true;
         this.current.counter = 0;
+        // tslint:disable-next-line:no-unused-expression
         this.current.start && this.current.start(this.current, this.data);
     }
 
-    update(){
-        if( this.current ) {
+    public update() {
+        if ( this.current ) {
 
             this.current.currentTime = this.getNowTime();
             this.current.elapsedTimeFromStart = this.current.currentTime - this.current.startTime;
-            let next = this.current.update(this.current, this.data);
+            const next = this.current.update(this.current, this.data);
             this.current.counter++;
-            if( typeof next != "undefined" && next != this.current.name ){
+            if ( typeof next != "undefined" && next != this.current.name ) {
                 this.start(next);
             }
         }
     }
 
-    stop(){
-        this.states.forEach((s)=>{
-            if( s.started ) {
+    public stop() {
+        this.states.forEach((s) => {
+            if ( s.started ) {
                 s.started = false;
+                // tslint:disable-next-line:no-unused-expression
                 s.stop && s.stop(s, this.data);
             }
         });
         this.current = null;
     }
 
-    get(name : string) : STATE {
-        return this.states.find((s)=>s.name == name);
+    public get(name: string): STATE {
+        return this.states.find((s) => s.name == name);
     }
 
-    protected getNowTime(){
-        return Date.now();
-    }
-
-    destroy() {
+    public destroy() {
         this.states = [];
         this.current = null;
+    }
+
+    protected getNowTime() {
+        return Date.now();
     }
 }
