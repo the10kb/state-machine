@@ -16,7 +16,7 @@ export class StateMachine<STATE extends IState = IState, DATA = any> {
     public states: STATE[];
     public current: STATE;
 
-    constructor(private data: DATA) {}
+    constructor(public data: DATA) {}
 
     public start(startState: string, forceRestart: boolean = false) {
         if ( !forceRestart && this.current && this.current.name == startState ) {
